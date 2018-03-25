@@ -11,7 +11,7 @@
 .slider__item {
     display: inline-block;
     width: 100%;
-    transition: all .5s ease-out;
+    transition: all .8s ease-out;
     font-size: 14px;
 }
 
