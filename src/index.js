@@ -182,7 +182,7 @@ class Slider {
     }
 }
 
-
+// =remove in prod
 new Slider();
 
 
