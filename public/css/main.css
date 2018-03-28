@@ -11,8 +11,13 @@
 .slider__item {
     display: inline-block;
     width: 100%;
-    transition: all .8s ease-out;
+    transition: all .5s ease-out;
     font-size: 14px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }
 
 /* =button */
@@ -23,12 +28,78 @@
     z-index: 5;
     height: 100%;
     width: 40px;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    background-image: url(https://www.ibs.it/Content/images/arrow-left.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: auto auto;
 }
 
 .slider__next {
-    left: 0;
+    right: 0;
+    transform: rotate(180deg);
 }
 
 .slider__prev {
+    left: 0;
+}
+
+/* =placeholder */
+.placeholder {
+    position: absolute;
+    z-index: 5;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
     right: 0;
+    bottom: 10px;
+}
+
+.placeholder__list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.placeholder__item {
+    position: relative;
+}
+
+.placeholder__label {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    color: currentColor;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s linear;
+}
+
+.placeholder__item:hover {
+    color: #238C9F;
+}
+
+.placeholder__label::before {
+    display: inline-block;
+    content: "";
+    height: .6rem;
+    width: .6rem;
+    margin-right: 0.625rem;
+    border: 0.2rem solid currentColor;
+    border-radius: 50%;
+    transition: all 0.25s linear;
+}
+
+.placeholder__radio {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.placeholder__radio:checked+.placeholder__label::before {
+    border: 0.3rem solid #014653;
+    background: #fff;
 }

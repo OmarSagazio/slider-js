@@ -8,43 +8,62 @@ import '../public/css/main.css';
  * TODO: =improvements
  *  - add Object with default properties
  *      + id
+ *      + array
+ * --------------------------------------------------------------------------
+ *      + font-size: 14px;  -- reset 4 items
+ *      + Buttons 
+ *          -> appear only if there are more than 1 slide
+ *          -> deferred
  *      + transition: all .8s ease-out; -- <property> <duration> <function>
  *                  slide.style.transition = 'transform 0.5s ease-out';
  *                  slide.style.transform = 'translateX(___)';
- *      + font-size: 14px;  -- reset 4 items
+ * --------------------------------------------------------------------------
+ *      + Parallax Effect
  *      + TODO: improve! Avoid delta on start dragging
  *              this.moveCard(diff);
- *      + Parallax Effect
  */
 class Slider {
-    constructor(id = "slider") {
+    constructor(id = "slider", isCarousel = false, hasPlaceholders = false, placeholderPattern = "p-", contents = []) {
 
-        window.addEventListener("load", this.init.bind(this)(id));
-
-        // TODO: check if there is a load listener in the prod bundle        
-        // this.init(id);
+        window.addEventListener("load", this.init.bind(this, id, isCarousel, hasPlaceholders, placeholderPattern, contents));
 
     }
 
-    init(id) {
+    init(id, isCarousel, hasPlaceholders, placeholderPattern, contents) {
 
         // =properties
         this.sliderId = id;
+        this.contents = contents;
+        this.isCarousel = isCarousel;
+        this.hasPlaceholders = hasPlaceholders;
+        this.placeholderPattern = placeholderPattern;
+
+        // =
         this.currentIndex = 0;
         this.isDragging = false;
         this.startX = 0;
         this.currentX = 0;
 
-        // =refs
+        // =slider
         const sliderRef = "#" + this.sliderId;
+        const slider = document.querySelector(sliderRef);
+
+        // =defer
+        if (contents.length > 0) {
+            this.loadContent(slider);
+        }
+
+
+        // =refs
         const nextRef = sliderRef + " > .slider__next";
         const prevRef = sliderRef + " > .slider__prev";
         const slidesRef = sliderRef + " > .slider__item";
+        const placeholderRefs = sliderRef + " > .placeholder > .placeholder__list > .placeholder__item > .placeholder__radio";
 
         // =pointers
-        const slider = document.querySelector(sliderRef);
         const nextButton = document.querySelector(nextRef);
         const prevButton = document.querySelector(prevRef);
+        this.placeholders = document.querySelectorAll(placeholderRefs);
 
         // =properties
         this.slides = document.querySelectorAll(slidesRef);
@@ -67,9 +86,131 @@ class Slider {
         slider.addEventListener('mousemove', this.onMove.bind(this));
         slider.addEventListener('mouseup', this.onEnd.bind(this));
 
+        // TODO:
+        // slider.addEventListener('mouseover', this.onStart.bind(this));
+        // slider.addEventListener('mouseout', this.onEnd.bind(this));
+
+
+        // =placeholder
+        if (this.hasPlaceholders) {
+            this.placeholders.forEach(
+                placeholder => placeholder.addEventListener("click", this.selectSlide.bind(this))
+            );
+
+            // update placeholder
+            this.updatePlaceholder();
+        }
+
+
+        // =carousel
+        if (this.isCarousel) {
+            this.startCarousel();
+        }
+    }
+
+    selectSlide(event) {
+        const position = this.getPosition(event.target.id);
+        const distances = this.getTranslateDistances(position);
+        for (let i = 0; i < this.slides.length; i++) {
+            this.move(this.slides[i], distances[i]);
+        }
+
+        this.currentIndex = position;
+    }
+
+    getTranslateDistances(pos) {
+
+        // Validation
+        if (pos < 0 || this.slides.length < 2) {
+            return
+        }
+
+        const k = -100;
+        const length = this.slides.length;
+        let distances = [];
+
+        // 
+        if (pos === 0) {
+            distances.push(0);
+            for (let i = 0; i < length - 1; i++) {
+                const val = i * k;
+                distances.push(val);
+            }
+            return distances;
+        }
+
+        // 
+        if (pos === 1) {
+            distances.push(k);
+            distances.push(k);
+
+            for (let i = 1; i < length - 1; i++) {
+                const val = i * k;
+                distances.push(val);
+            }
+
+            return distances;
+        }
+
+
+        // init
+        distances.push(k);
+
+        // pre
+        for (let i = 1, n = 2; i < pos - 1; i++, n++) {
+            const val = n * k;
+            distances.push(val);
+        }
+
+        // current
+        const range = (length - 1 > pos) ? 3 : 2;
+        for (let i = 0; i < range; i++) {
+            distances.push(pos * k);
+        }
+
+        // post
+        if (length > 4) {
+            for (let i = pos + 2; i < length; i++) {
+                const val = (i - 1) * k;
+                distances.push(val);
+            }
+        }
+
+        return distances;
+
+    }
+
+    getPosition(id) {
+        return parseInt(id.replace(this.placeholderPattern, ""));
+    }
+
+    startCarousel() {
+        this.timeId = setInterval(
+            this.nextSlide.bind(this),
+            2000
+        );
+    }
+
+    loadContent(slider) {
+
+        // loop: inject content
+        this.contents.forEach(content => {
+            // =item-container
+            const itemContainerDiv = document.createElement("div");
+            itemContainerDiv.className = "slider__item";
+            itemContainerDiv.innerHTML = content;
+            slider.appendChild(itemContainerDiv);
+        });
+
     }
 
     onStart(evt) {
+
+        if (this.isCarousel && this.timeId) {
+            clearInterval(this.timeId);
+            return;
+        }
+
         // =dragging
         this.isDragging = true;
 
@@ -106,6 +247,12 @@ class Slider {
 
         // =direction
         const diff = this.startX - this.currentX;
+
+        // =
+        if (this.isCarousel && diff == 0) {
+            this.startCarousel();
+        }
+
         const isLeft = diff > 0;
         const isDraggedOver = Math.abs(diff) > this.windowWidth / 4;
 
@@ -124,10 +271,33 @@ class Slider {
 
     }
 
-    nextSlide() {
+    resetSlides() {
+        this.move(this.slides[0], 0);
 
+        for (let i = 1; i < this.slides.length; i++) {
+            const distance = (i - 1) * 100 * -1;
+            this.move(this.slides[i], distance);
+        }
+    }
+
+    // update placeholder
+    updatePlaceholder() {
+        if (this.hasPlaceholders) {
+            this.placeholders[this.currentIndex].checked = true
+        }
+    }
+
+    nextSlide() {
         // =last | have no next
-        if (this.currentIndex === this.slides.length - 1) return;
+        if (this.currentIndex === this.slides.length - 1) {
+            this.resetSlides();
+            this.currentIndex = 0;
+
+            // update placeholder
+            this.updatePlaceholder();
+
+            return;
+        }
 
         // =distance
         const distance = (this.currentIndex + 1) * 100 * -1;
@@ -139,6 +309,9 @@ class Slider {
         this.currentIndex++;
         slide = this.slides[this.currentIndex];
         this.move(slide, distance);
+
+        // update placeholder
+        this.updatePlaceholder();
     }
 
     prevSlide() {
@@ -160,6 +333,9 @@ class Slider {
 
         // =move
         this.move(slide, distance);
+
+        // update placeholder
+        this.updatePlaceholder();
     }
 
 
@@ -183,7 +359,34 @@ class Slider {
 }
 
 // =remove in prod
-new Slider();
+new Slider("slider", false, true);
+// init(id, isCarousel, hasPlaceholders, placeholderPattern, contents) 
+// new Slider("slider", false, []);
+
+//     new Slider("slider", false, [
+//     "abavavavavav",
+//     "cicicicocio",
+//     `<figure>
+//     <a class="img-ctn" href="/giro-del-mondo-in-sei-libro-guido-barbujani-andrea-brunelli/e/9788815274205" tabindex="0">
+//     <img class=" lazyloaded" src="https://img.ibs.it/images/9788815274205_0_0_180_50.jpg" data-src="https://img.ibs.it/images/9788815274205_0_0_180_50.jpg" alt="Libro Il giro del mondo in sei milioni di anni Guido Barbujani Andrea Brunelli">
+//     </a>
+//     <figcaption>
+//     <h3 class="title">
+//     <a href="/giro-del-mondo-in-sei-libro-guido-barbujani-andrea-brunelli/e/9788815274205" tabindex="0">
+//     Il giro del mondo in... </a>
+//     </h3>
+//     <h4 class="author">
+//     Guido Barbujani Andrea... </h4>
+//     <div class="rank">
+//     <span class="star starred"></span><span class="star starred"></span><span class="star starred"></span><span class="star starred"></span><span class="star starred"></span>
+//     </div>
+//     <div class="price">
+//     <span class="act-price">12,75 €</span>
+//     <span class="old-price">15,00 €</span>
+//     </div>
+//     </figcaption>
+//     </figure>`
+// ]);
 
 
 
