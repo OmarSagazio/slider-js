@@ -1,0 +1,21 @@
+/* =test */
+
+.slider__item.test {
+    height: 200px;
+    background-color: yellow;
+    border: 1px solid red;
+    text-align: center;
+    line-height: 200px;
+    font-size: 100px;
+    font-weight: 700;
+}
+
+.slider__item:nth-child(2n+1) {
+    background-color: blue;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}

@@ -1,33 +1,18 @@
-html,
-body {
-    margin: 0;
-    padding: 0;
-}
+/* =slider */
 
 .slider {
-    height: 250px;
-}
-
-/* card: positioning */
-
-.wrapper {
     position: relative;
+    font-size: 0;
+    white-space: nowrap;
+    box-sizing: border-box;
     overflow: hidden;
-    width: 100%;
-    height: 250px;
 }
 
-.card {
-    display: block;
-    position: absolute;
-    top: 0;
-    margin: 0 auto;
+.slider__item {
+    display: inline-block;
     width: 100%;
-    border-radius: 15px;
-    box-shadow: 0 30 50 rgba(0, 0, 0, 0.2);
-    transform: translateX(-50%);
-    transition: left 0.5s ease-out;
-    will-change: left;
+    transition: all .5s ease-out;
+    font-size: 14px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -35,89 +20,131 @@ body {
     user-select: none;
 }
 
-.card--active {
-    left: 50%;
-}
+/* =button */
 
-.card--not-active,
-.card--not-active {
-    left: 150%;
-}
-
-.card__image {
-    z-index: 1;
+.slider__button {
     position: absolute;
     top: 0;
-    left: 50%;
-    height: 250px;
-    width: auto;
-    transform: translateX(-50%);
-    user-select: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-}
-
-.card__will-animate {
-    will-change: transform;
-}
-
-/* =bottom placeholder */
-
-.cards-placeholder {
-    display: block;
-    position: relative;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.cards-placeholder__item {
-    opacity: 0.3;
-    display: inline-block;
-    margin-right: 10px;
-    background-color: #fff;
-    width: 30px;
-    height: 5px;
-    border-radius: 5px;
-    transition: opacity 0.2s;
-    will-change: opacity;
-}
-
-.cards-placeholder__item--active {
-    opacity: 1;
-}
-
-/* = */
-
-*:focus {
-    outline: none;
-}
-
-.slider__card-prev,
-.slider__card-next {
-    display: block;
-    border: 0 solid transparent;
+    z-index: 9999;
     height: 100%;
     width: 40px;
-    opacity: 0.9;
-    border-radius: 0 5px 5px 0;
     cursor: pointer;
-}
-
-.slider__card-prev {
-    background: url(https://www.ibs.it/Content/images/arrow-left.png);
+    border: none;
+    outline: none;
+    background-color: transparent;
+    background-image: url(https://www.ibs.it/Content/images/arrow-left.png);
     background-position: center center;
     background-repeat: no-repeat;
     background-size: auto auto;
-    float: left;
 }
 
-.slider__card-next {
-    background: url(https://www.ibs.it/Content/images/arrow-left.png);
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: auto auto;
+.slider__next {
+    right: 0;
     transform: rotate(180deg);
-    float: right;
+}
+
+.slider__prev {
+    left: 0;
+}
+
+/* =placeholder */
+
+.placeholder {
+    position: absolute;
+    z-index: 9999;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    bottom: 10px;
+}
+
+.placeholder__list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.placeholder__item {
+    position: relative;
+}
+
+.placeholder__item:hover {
+    color: #238C9F;
+}
+
+.placeholder__label {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    color: currentColor;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.25s linear;
+}
+
+
+.placeholder__label::before {
+    display: inline-block;
+    content: "";
+    height: .6rem;
+    width: .6rem;
+    margin-right: 0.625rem;
+    border: 0.2rem solid currentColor;
+    border-radius: 50%;
+    transition: all 0.25s linear;
+}
+
+.placeholder__radio {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.placeholder__radio:checked+.placeholder__label::before {
+    border: 0.3rem solid #014653;
+    background: #fff;
+}
+
+/* play */
+.placeholder__check {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.placeholder__play {
+    align-items: center;
+    cursor: pointer;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    color: currentColor;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.25s linear;
+}
+
+.placeholder__play::before {
+    content: "";
+    height: 1rem;
+    width: 1rem;
+    margin: 0 0 0 12px;
+    transition: all 0.2s linear;
+    border-style: double;
+    border-width: 0 0 0 1rem;
+    box-sizing: border-box;
+}
+
+.placeholder__check:checked+.placeholder__play::before {
+    width: 1rem;
+    height: 1rem;
+    margin: 0 0 0 12px;
+    border-style: solid;
+    border-width: .6rem 0px .6rem 1rem;
+    border-color: transparent transparent transparent #202020;
+    box-sizing: border-box;
 }
