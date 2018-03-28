@@ -82,13 +82,9 @@ class Slider {
         slider.addEventListener('touchend', this.onEnd.bind(this));
 
         // =mouse-events
-        slider.addEventListener('mousedown', this.onStart.bind(this));
-        slider.addEventListener('mousemove', this.onMove.bind(this));
-        slider.addEventListener('mouseup', this.onEnd.bind(this));
-
-        // TODO:
-        // slider.addEventListener('mouseover', this.onStart.bind(this));
-        // slider.addEventListener('mouseout', this.onEnd.bind(this));
+        // slider.addEventListener('mousedown', this.onStart.bind(this));
+        // slider.addEventListener('mousemove', this.onMove.bind(this));
+        // slider.addEventListener('mouseup', this.onEnd.bind(this));
 
 
         // =placeholder
@@ -104,8 +100,26 @@ class Slider {
 
         // =carousel
         if (this.isCarousel) {
+            this.timeId = 1;
             this.startCarousel();
+
+            const carouselRef = sliderRef + " > .placeholder > .placeholder__list > .placeholder__carousel";
+            const carouselLabel = document.querySelector(carouselRef + " > .placeholder__play");
+            const carouselCheck = document.querySelector(carouselRef + " > .placeholder__check");
+            carouselCheck.checked = false
+            this.isCarouselChecked = carouselCheck.checked;
+            carouselLabel.addEventListener("click", this.onToggleCarousel.bind(this));
         }
+    }
+
+    onToggleCarousel() {
+        if (this.isCarouselChecked) {
+            this.timeId = 1;
+            this.startCarousel();
+        } else {
+            this.stopCarousel();
+        }
+        this.isCarouselChecked = !this.isCarouselChecked;
     }
 
     selectSlide(event) {
@@ -185,10 +199,17 @@ class Slider {
     }
 
     startCarousel() {
+        if (this.timeId === 0) return;
+
         this.timeId = setInterval(
             this.nextSlide.bind(this),
             2000
         );
+    }
+
+    stopCarousel() {
+        clearInterval(this.timeId);
+        this.timeId = 0;
     }
 
     loadContent(slider) {
@@ -205,9 +226,8 @@ class Slider {
     }
 
     onStart(evt) {
-
         if (this.isCarousel && this.timeId) {
-            clearInterval(this.timeId);
+            this.stopCarousel();
             return;
         }
 
@@ -244,13 +264,13 @@ class Slider {
     }
 
     onEnd() {
-
         // =direction
         const diff = this.startX - this.currentX;
 
         // =
         if (this.isCarousel && diff == 0) {
             this.startCarousel();
+            return;
         }
 
         const isLeft = diff > 0;
@@ -358,8 +378,11 @@ class Slider {
     }
 }
 
-// =remove in prod
-new Slider("slider", false, true);
+// =slider
+// new Slider("slider", false, true);
+// =carousel
+new Slider("slider", true, true);
+
 // init(id, isCarousel, hasPlaceholders, placeholderPattern, contents) 
 // new Slider("slider", false, []);
 
