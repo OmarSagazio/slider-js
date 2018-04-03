@@ -21,15 +21,31 @@ import '../public/css/main.css';
  *      + Parallax Effect
  *      + TODO: improve! Avoid delta on start dragging
  *              this.moveCard(diff);
+ * 
+ *      + =timer improvements   -- 
+ *          https://stackoverflow.com/questions/8126466/javascript-reset-setinterval-back-to-0
+ * 
+ *      + RENAME
+ *      Carousel to Autoplay
  */
-class Slider {
-    constructor(id = "slider", isCarousel = false, hasPlaceholders = false, placeholderPattern = "p-", contents = []) {
 
-        window.addEventListener("load", this.init.bind(this, id, isCarousel, hasPlaceholders, placeholderPattern, contents));
+const store = {
+    id: "slider",
+    carousel: {},
+    placeholders: {},
+    contents: {}
+};
+
+class Slider {
+    constructor(id = "slider", isCarousel = false, hasPlaceholders = false, placeholderPattern = "p-",
+        delay = 6000, contents = []) {
+
+        window.addEventListener("load", this.init.bind(this, id, isCarousel, hasPlaceholders,
+            placeholderPattern, delay, contents));
 
     }
 
-    init(id, isCarousel, hasPlaceholders, placeholderPattern, contents) {
+    init(id, isCarousel, hasPlaceholders, placeholderPattern, delay, contents) {
 
         // =properties
         this.sliderId = id;
@@ -37,6 +53,7 @@ class Slider {
         this.isCarousel = isCarousel;
         this.hasPlaceholders = hasPlaceholders;
         this.placeholderPattern = placeholderPattern;
+        this.delay = delay;
 
         // =
         this.currentIndex = 0;
@@ -58,12 +75,13 @@ class Slider {
         const nextRef = sliderRef + " > .slider__next";
         const prevRef = sliderRef + " > .slider__prev";
         const slidesRef = sliderRef + " > .slider__item";
-        const placeholderRefs = sliderRef + " > .placeholder > .placeholder__list > .placeholder__item > .placeholder__radio";
+        const placeholderRefs = sliderRef + " > .placeholder";
+        const placeholderRadioRefs = sliderRef + " > .placeholder > .placeholder__list > .placeholder__item > .placeholder__radio";
 
         // =pointers
         const nextButton = document.querySelector(nextRef);
         const prevButton = document.querySelector(prevRef);
-        this.placeholders = document.querySelectorAll(placeholderRefs);
+        this.placeholders = document.querySelectorAll(placeholderRadioRefs);
 
         // =properties
         this.slides = document.querySelectorAll(slidesRef);
@@ -77,9 +95,9 @@ class Slider {
         prevButton.addEventListener('click', this.prevSlide.bind(this));
 
         // =touch-events
-        slider.addEventListener('touchstart', this.onStart.bind(this));
-        slider.addEventListener('touchmove', this.onMove.bind(this));
-        slider.addEventListener('touchend', this.onEnd.bind(this));
+        // slider.addEventListener('touchstart', this.onStart.bind(this));
+        // slider.addEventListener('touchmove', this.onMove.bind(this));
+        // slider.addEventListener('touchend', this.onEnd.bind(this));
 
         // =mouse-events
         // slider.addEventListener('mousedown', this.onStart.bind(this));
@@ -95,6 +113,8 @@ class Slider {
 
             // update placeholder
             this.updatePlaceholder();
+
+            document.querySelector(placeholderRefs).style.display = "block";
         }
 
 
@@ -123,6 +143,10 @@ class Slider {
     }
 
     selectSlide(event) {
+        // =stop-timer
+        this.timeId = clearInterval(this.timeId);
+        
+
         const position = this.getPosition(event.target.id);
         const distances = this.getTranslateDistances(position);
         for (let i = 0; i < this.slides.length; i++) {
@@ -130,6 +154,10 @@ class Slider {
         }
 
         this.currentIndex = position;
+
+
+        // =start-timer
+        this.startCarousel();
     }
 
     getTranslateDistances(pos) {
@@ -203,7 +231,7 @@ class Slider {
 
         this.timeId = setInterval(
             this.nextSlide.bind(this),
-            2000
+            this.delay
         );
     }
 
@@ -226,7 +254,7 @@ class Slider {
     }
 
     onStart(evt) {
-        if (this.isCarousel && this.timeId) {
+        if (this.isCarousel && this.timeId === 0) {
             this.stopCarousel();
             return;
         }
@@ -308,6 +336,10 @@ class Slider {
     }
 
     nextSlide() {
+        // =stop-timer
+        this.timeId = clearInterval(this.timeId);
+
+
         // =last | have no next
         if (this.currentIndex === this.slides.length - 1) {
             this.resetSlides();
@@ -315,6 +347,9 @@ class Slider {
 
             // update placeholder
             this.updatePlaceholder();
+
+            // =start-timer
+            this.startCarousel();
 
             return;
         }
@@ -332,12 +367,22 @@ class Slider {
 
         // update placeholder
         this.updatePlaceholder();
+
+        // =start-timer
+        this.startCarousel();
     }
 
-    prevSlide() {
+    prevSlide() {        
+        // =stop-timer
+        this.timeId = clearInterval(this.timeId);
+
 
         // =first | have no prev
-        if (this.currentIndex === 0) return;
+        if (this.currentIndex === 0) {
+            // start-timer
+            this.startCarousel();
+            return;
+        } 
 
         // =distance
         const distance = ((this.currentIndex + 1) * 100 * -1) + 200;
@@ -356,6 +401,11 @@ class Slider {
 
         // update placeholder
         this.updatePlaceholder();
+
+        
+        // start-timer
+        this.startCarousel();
+        return;
     }
 
 
@@ -381,7 +431,7 @@ class Slider {
 // =slider
 // new Slider("slider", false, true);
 // =carousel
-new Slider("slider", true, true);
+new Slider("slider", true, true, "p-", 2000);
 
 // init(id, isCarousel, hasPlaceholders, placeholderPattern, contents) 
 // new Slider("slider", false, []);
