@@ -4,15 +4,58 @@ import '../public/css/test.css';
 
 import '../public/css/main.css';
 
+/**
+ * TODO: =improvements
+ *  - add Object with default properties
+ *      + id
+ *      + array
+ * --------------------------------------------------------------------------
+ *      + font-size: 14px;  -- reset 4 items
+ *      + Buttons 
+ *          -> appear only if there are more than 1 slide
+ *          -> deferred
+ *      + transition: all .8s ease-out; -- <property> <duration> <function>
+ *                  slide.style.transition = 'transform 0.5s ease-out';
+ *                  slide.style.transform = 'translateX(___)';
+ * --------------------------------------------------------------------------
+ *      + Parallax Effect
+ *      + TODO: improve! Avoid delta on start dragging
+ *              this.moveCard(diff);
+ * 
+ *      + =timer improvements   -- 
+ *          https://stackoverflow.com/questions/8126466/javascript-reset-setinterval-back-to-0
+ * 
+            // Usage:
+            // var timer = new Timer(function() {
+            //     // your function here
+            // }, 5000);
 
-// =store
+            // // switch interval to 10 seconds
+            // timer.reset(10000);
+
+            // // stop the timer
+            // timer.stop();
+
+            // // start the timer
+            // timer.start();
+ * 
+ *      + RENAME
+ *      Carousel to Autoplay
+ * 
+ *
+ *      // =mouse-events
+ *      // slider.addEventListener('mousedown', this.onStart.bind(this));
+ *      // slider.addEventListener('mousemove', this.onMove.bind(this));
+ *      // slider.addEventListener('mouseup', this.onEnd.bind(this));
+ */
+
+// =
 const store = {
     id: "slider",
     carousel: {},
     placeholders: {},
     contents: {}
 };
-
 
 // =timer
 function Timer(fn, t) {
@@ -43,7 +86,8 @@ function Timer(fn, t) {
 }
 
 
-// =slider
+
+
 class Slider {
     constructor(id = "slider", isAutoplay = false, hasPlaceholders = false, placeholderPattern = "p-",
         delay = 6000, contents = []) {
@@ -148,7 +192,7 @@ class Slider {
 
     // =select-slide
     selectSlide(event) {
-        if (this.isAutoplay && !this.isPauseChecked) {
+        if (!this.isPauseChecked) {
             // =stop-timer
             this.timer.stop();
         }
@@ -163,12 +207,12 @@ class Slider {
 
         this.currentIndex = position;
 
-        if (this.isAutoplay && !this.isPauseChecked) {
+        if (!this.isPauseChecked) {
             // =start-timer
             this.timer.start();
         }
 
-        // event.preventDefault();
+        event.preventDefault();
         // event.stopPropagation();
     }
 
@@ -252,7 +296,7 @@ class Slider {
     }
 
     onStart(evt) {
-        if (this.isAutoplay && !this.isPauseChecked) {
+        if (!this.isPauseChecked) {
             this.timer.stop();
         }
 
@@ -265,9 +309,9 @@ class Slider {
 
         // =
         this.windowWidth = window.innerWidth;
-
+        
         //
-        if (this.isAutoplay && !this.isPauseChecked) {
+        if (!this.isPauseChecked) {
             this.timer.start();
         }
     }
@@ -299,6 +343,8 @@ class Slider {
 
         // =
         if (!this.isAutoplay && diff === 0) {
+            // if (!this.isPauseChecked && diff === 0) {
+            // this.timer.stop();
             return;
         }
 
@@ -336,7 +382,7 @@ class Slider {
     }
 
     nextSlide() {
-        if (this.isAutoplay && !this.isPauseChecked) {
+        if (!this.isPauseChecked) {
             // =stop-timer
             this.timer.stop();
         }
@@ -351,7 +397,7 @@ class Slider {
             // update placeholder
             this.updatePlaceholder();
 
-            if (this.isAutoplay && !this.isPauseChecked) {
+            if (!this.isPauseChecked) {
                 // =start-timer
                 this.timer.start();
             }
@@ -373,14 +419,14 @@ class Slider {
         // update placeholder
         this.updatePlaceholder();
 
-        if (this.isAutoplay && !this.isPauseChecked) {
+        if (!this.isPauseChecked) {
             // =start-timer
             this.timer.start();
         }
     }
 
     prevSlide() {
-        if (this.isAutoplay && !this.isPauseChecked) {
+        if (!this.isPauseChecked) {
             // =stop-timer
             this.timer.stop();
         }
@@ -388,7 +434,7 @@ class Slider {
 
         // =first | have no prev
         if (this.currentIndex === 0) {
-            if (this.isAutoplay && !this.isPauseChecked) {
+            if (!this.isPauseChecked) {
                 // start-timer
                 this.timer.start();
             }
@@ -413,7 +459,7 @@ class Slider {
         // update placeholder
         this.updatePlaceholder();
 
-        if (this.isAutoplay && !this.isPauseChecked) {
+        if (!this.isPauseChecked) {
             // start-timer
             this.timer.start();
         }
@@ -441,7 +487,110 @@ class Slider {
 }
 
 // =slider
-// new Slider("slider", false, true, "p-", 2000);
-
-// =autoplay
+// new Slider("slider", false, true);
+// =carousel
 new Slider("slider", true, true, "p-", 2000);
+
+// init(id, isAutoplay, hasPlaceholders, placeholderPattern, contents) 
+// new Slider("slider", false, []);
+
+//     new Slider("slider", false, [
+//     "abavavavavav",
+//     "cicicicocio",
+//     `<figure>
+//     <a class="img-ctn" href="/giro-del-mondo-in-sei-libro-guido-barbujani-andrea-brunelli/e/9788815274205" tabindex="0">
+//     <img class=" lazyloaded" src="https://img.ibs.it/images/9788815274205_0_0_180_50.jpg" data-src="https://img.ibs.it/images/9788815274205_0_0_180_50.jpg" alt="Libro Il giro del mondo in sei milioni di anni Guido Barbujani Andrea Brunelli">
+//     </a>
+//     <figcaption>
+//     <h3 class="title">
+//     <a href="/giro-del-mondo-in-sei-libro-guido-barbujani-andrea-brunelli/e/9788815274205" tabindex="0">
+//     Il giro del mondo in... </a>
+//     </h3>
+//     <h4 class="author">
+//     Guido Barbujani Andrea... </h4>
+//     <div class="rank">
+//     <span class="star starred"></span><span class="star starred"></span><span class="star starred"></span><span class="star starred"></span><span class="star starred"></span>
+//     </div>
+//     <div class="price">
+//     <span class="act-price">12,75 €</span>
+//     <span class="old-price">15,00 €</span>
+//     </div>
+//     </figcaption>
+//     </figure>`
+// ]);
+
+
+
+
+
+// -----------------------------------------------------------------------------
+//              =lazy-loading
+// -----------------------------------------------------------------------------
+//
+// // =test
+// var sliderCiao = new Slider("ciao", [
+//     'https://img.ibs.it/images/9788869183492_2_0_300_75.jpg',
+//     'https://img.ibs.it/images/9788869183492_1_0_300_75.jpg',
+//     'https://img.ibs.it/images/9788869183492_3_0_300_75.jpg',
+//     'https://img.ibs.it/images/9788869183492_4_0_300_75.jpg'
+// ]);
+
+
+// -----------------------------------------------------------------------------
+//              =card-creator
+// -----------------------------------------------------------------------------
+//
+// Slider.prototype.cardCreator = function () {
+//     var self = this;
+//     this.imageUrls.forEach(function (url) {
+//         // CARD
+//         // card: div
+//         var cardDiv = document.createElement("div");
+//         cardDiv.className = "card card--not-active";
+
+//         // card: img
+//         var cardImg = document.createElement("img");
+//         cardImg.className = "card__image card__will-animate";
+//         cardImg.src = url;
+
+//         // card: div > img
+//         cardDiv.appendChild(cardImg);
+
+//         // card: add to DOM
+//         var queryCard = "#" + self.sliderId + " > .wrapper > .card--active";
+//         var currentCardDiv = document.querySelector(queryCard);
+//         var queryParent = "#" + self.sliderId + " > .wrapper";
+//         var parentCardDiv = document.querySelector(queryParent);
+
+
+//         parentCardDiv.insertBefore(cardDiv, currentCardDiv.nextSibling);
+
+//         // PLACEHOLDER
+//         // =placeholder
+//         var placeholderItemDiv = document.createElement("div");
+//         placeholderItemDiv.className = "cards-placeholder__item";
+
+//         // // card: add to DOM
+//         var queryPlaceholder = "#" + self.sliderId +
+//             " > .cards-placeholder > .cards-placeholder__item";
+//         var currentPlaceholderDiv = document.querySelector(queryPlaceholder);
+//         var queryPlaceholderParent = "#" + self.sliderId + " > .cards-placeholder";
+//         var parentDiv = document.querySelector(queryPlaceholderParent);
+//         parentDiv.insertBefore(placeholderItemDiv, currentPlaceholderDiv.nextSibling);
+//     });
+// }
+
+
+// -----------------------------------------------------------------------------
+//              =slide while dragging
+// -----------------------------------------------------------------------------
+//
+// Slider.prototype.moveCard = function (diff) {
+
+//     var card = this.cards[this.currentIndex];
+
+//     card.style.transform = 'translateX(calc(' + diff + 'px - 50%))';
+//     diff *= -1;
+
+//     this.moveCardEls(diff);
+// };
